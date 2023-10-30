@@ -5,7 +5,7 @@ import cv2
 import glob
 import os
 
-path_for_license_plates = os.getcwd() + "/dataset/gfg_dataset/*.jpg"
+path_for_license_plates = os.getcwd() + "/dataset/ALABAMA/*.jpg"
 actual_list = []
 predicted_license_plates = []
 
@@ -19,11 +19,14 @@ for path_to_license_plate in glob.glob(path_for_license_plates, recursive=True):
     '''
     img = cv2.imread(path_to_license_plate)
 
-    # NOTE: this is needed on actual dataset
-    # '''
-    # Cropping the image
-    # '''
-    # cropped_image = img[40:90, 0:450]
+    '''
+    Cropping the image
+    '''
+    cropped_image = img[35:95, 0:450]
+
+    # plt.subplot(3, 3, int(license_plate))
+    # plt.imshow(cropped_image)
+    # plt.axis('off')
 
     # plt.imshow(crop)
 
@@ -31,7 +34,7 @@ for path_to_license_plate in glob.glob(path_for_license_plates, recursive=True):
     Re-size the image
     '''
     resize_test_license_plate = cv2.resize(
-        img, None, fx=2, fy=2,
+        cropped_image, None, fx=2, fy=2,
         interpolation=cv2.INTER_CUBIC)
 
     # plt.imshow(resize_test_license_plate)
@@ -50,6 +53,10 @@ for path_to_license_plate in glob.glob(path_for_license_plates, recursive=True):
     gaussian_blur_license_plate = cv2.GaussianBlur(
         grayscale_resize_test_license_plate, (5, 5), 0)
 
+    plt.subplot(3, 3, int(license_plate))
+    plt.imshow(gaussian_blur_license_plate)
+    plt.axis('off')
+
     ''' 
     We then pass each license plate image file 
     to the Tesseract OCR engine using the Python library  
@@ -63,6 +70,7 @@ for path_to_license_plate in glob.glob(path_for_license_plates, recursive=True):
     filter_predicted_result = "".join(predicted_result.split()).replace(":", "").replace("-", "")
     predicted_license_plates.append(filter_predicted_result)
 
+plt.show()
 print("Actual plate", "Predicted License Plate")
 print("------------", "-----------------------")
 
