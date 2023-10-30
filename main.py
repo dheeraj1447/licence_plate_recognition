@@ -5,7 +5,7 @@ import cv2
 import glob
 import os
 
-path_for_license_plates = os.getcwd() + "/dataset/ALABAMA/*.jpg"
+path_for_license_plates = os.getcwd() + "/dataset/gfg_dataset/*.jpg"
 actual_list = []
 predicted_license_plates = []
 
@@ -19,10 +19,11 @@ for path_to_license_plate in glob.glob(path_for_license_plates, recursive=True):
     '''
     img = cv2.imread(path_to_license_plate)
 
-    '''
-    Cropping the image
-    '''
-    cropped_image = img[40:90, 0:450]
+    # NOTE: this is needed on actual dataset
+    # '''
+    # Cropping the image
+    # '''
+    # cropped_image = img[40:90, 0:450]
 
     # plt.imshow(crop)
 
@@ -30,7 +31,7 @@ for path_to_license_plate in glob.glob(path_for_license_plates, recursive=True):
     Re-size the image
     '''
     resize_test_license_plate = cv2.resize(
-        cropped_image, None, fx=2, fy=2,
+        img, None, fx=2, fy=2,
         interpolation=cv2.INTER_CUBIC)
 
     # plt.imshow(resize_test_license_plate)
