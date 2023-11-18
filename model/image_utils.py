@@ -7,11 +7,6 @@ def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
-# noise removal
-def remove_noise(image):
-    return cv2.medianBlur(image, 5)
-
-
 # thresholding
 def thresholding(image):
     return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
@@ -40,25 +35,22 @@ def canny_edge(image):
     return cv2.Canny(image, 100, 200)
 
 
-# skew correction
-def deskew(image):
-    coords = np.column_stack(np.where(image > 0))
-    angle = cv2.minAreaRect(coords)[-1]
-    if angle < -45:
-        angle = -(90 + angle)
-    else:
-        angle = -angle
-        (h, w) = image.shape[:2]
-        center = (w // 2, h // 2)
-        M = cv2.getRotationMatrix2D(center, angle, 1.0)
-        rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-        return rotated
-
-
 # template matching
 def match_template(image, template):
     return cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
 
 
 def blur(image):
-    return cv2.medianBlur(image, 5)
+    return cv2.GaussianBlur(image, (5, 5), 0)
+
+
+def contour_extraction(image):
+    contours, _ = cv2.findContours(image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    return [contour for contour in contours if cv2.contourArea(contour) > 0]
+
+
+def bounding_boxes(filtered_contours, gray):
+    boxes = [cv2.boundingRect(contour) for contour in filtered_contours]
+    for x, y, w, h in boxes:
+        roi = gray[y:y+h, x:x+w]
+        return cv2.resize(roi, (200, 200))

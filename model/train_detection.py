@@ -1,35 +1,48 @@
 import os
-import re
 
 import cv2
-from pytesseract import pytesseract, Output
+from pytesseract import pytesseract
 
-from model.image_utils import get_grayscale, thresholding, opening, canny_edge, blur
+from model.image_utils import get_grayscale, thresholding
+
+output_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/dataset/train_final/"
 
 
-def train(image_path):
+def train(image_path, directory, file_name):
     image = cv2.imread(image_path)
-    # '''
-    # Cropping the image
-    # '''
-    # image = image[35:105, 0:450]
+
     gray = get_grayscale(image)
-    blurry = blur(gray)
-    thresh = thresholding(blurry)
-    open_img = opening(thresh)
-    can = canny_edge(open_img)
+    # blurry = blur(gray)
+    threshold = thresholding(gray)
 
-    d = pytesseract.image_to_data(image, output_type=Output.DICT)
-    print(d.keys())
+    output_directory = output_dir + directory + "/"
+    # Check if the directory exists, and create it if not
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
 
-    date_pattern = '^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/(19|20)\d\d$'
+    custom_config = r'--psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ tessedit_char_blacklist=[],~`/\.)('
+    boxes = pytesseract.image_to_boxes(threshold, config=custom_config).splitlines()
 
-    n_boxes = len(d['text'])
-    for i in range(n_boxes):
-        if int(d['conf'][i]) > 60:
-            if re.match(date_pattern, d['text'][i]):
-                (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-                image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    # Extract bounding box coordinates for each letter
+    letter_boxes = []
+    for box in boxes:
+        b = box.split()
+        x, y, w, h = int(b[1]), int(b[2]), int(b[3]), int(b[4])
+        letter_boxes.append((x, y, w, h))
 
-    cv2.imshow('img', can)
-    cv2.waitKey(0)
+    if len(letter_boxes) > 0:
+        # Calculate a bounding box that encloses all letter bounding boxes
+        min_x = min(box[0] for box in letter_boxes)
+        min_y = min(box[1] for box in letter_boxes)
+        max_x = max(box[0] + box[2] for box in letter_boxes)
+        max_y = max(box[1] + box[3] for box in letter_boxes)
+
+        # Crop the image based on the calculated bounding box
+        cropped_image = threshold[min_y:max_y, min_x:max_x]
+
+        # d = pytesseract.image_to_data(cropped_image, config=custom_config, output_type=Output.DICT)
+        print(file_name)
+
+        cv2.imwrite(output_directory + file_name + ".jpg", cropped_image)
+    else:
+        print("skipped image - " + directory + file_name + ".jpg")
