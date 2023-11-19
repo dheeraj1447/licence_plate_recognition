@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 
 MIN_AREA = 80
 MIN_WIDTH, MIN_HEIGHT = 5, 20
