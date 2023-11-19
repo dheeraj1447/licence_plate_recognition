@@ -1,2 +1,5 @@
 /dataset/
 /temp/
+/build/
+/dist/
+/gui.spec
