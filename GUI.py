@@ -5,8 +5,9 @@ from PIL import Image, ImageTk
 from datetime import datetime
 from main import process_image
 
+
 class ImageTimestampApp:
-    def _init_(self, root):
+    def __init__(self, root):
         self.root = root
         self.root.title("Smart Parking System")
         self.image1 = None
@@ -72,11 +73,12 @@ class ImageTimestampApp:
         recognised_text_1 = process_image(self.file_path1)
         recognised_text_2 = process_image(self.file_path2)
         if recognised_text_1 is not None and recognised_text_2 is not None:
-            if recognised_text_1._eq_(recognised_text_2):
+            if recognised_text_1.__eq__(recognised_text_2):
                 difference = self.timestamp2 - self.timestamp1
                 total_seconds = difference.total_seconds()
                 messagebox.showinfo("SUCCESS",
-                                    "The recognised licence plate number is - " + recognised_text_1 + ". Proceed to pay $" + str(total_seconds * 10))
+                                    "The recognised licence plate number is - " + recognised_text_1 + ". Proceed to pay $" + str(
+                                        total_seconds * 10))
             else:
                 messagebox.showerror("ERROR",
                                      "The recognised licence plate numbers are - " + recognised_text_1 + " and "
@@ -85,7 +87,8 @@ class ImageTimestampApp:
             messagebox.showerror("ERROR",
                                  "Unable to recognize the characters on licence plates!")
 
-if _name_ == "_main_":
+
+if __name__ == "__main__":
     root = tk.Tk()
     app = ImageTimestampApp(root)
     root.mainloop()
